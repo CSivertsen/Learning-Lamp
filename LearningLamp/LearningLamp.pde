@@ -1,6 +1,8 @@
+import processing.serial.*;
+
 int reinforceValue; 
 QLearning Qobj;
-
+Serial myPort;
 
 void setup() {
   size(300, 300);
@@ -27,4 +29,8 @@ void mousePressed(){
 
 void keyPressed(){
   Qobj.showPolicy();
+}
+
+void serialEvent(Serial myPort){
+  Qobj.mySR.serialEvent(myPort);
 }
