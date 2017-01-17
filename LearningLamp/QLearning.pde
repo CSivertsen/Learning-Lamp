@@ -73,12 +73,12 @@ class QLearning {
   void reinforce(int val) {
     State newState = currentSituation.updateStateVal(val, currentState);     
     currentState = newState; 
-    sendState(newState);
+    //sendState(newState);
   }
 
-  void sendState(State newState) {
+  /*void sendState(State newState) {
     mySR.sendState = newState;
-  }
+  }*/
 
   void display() {
 

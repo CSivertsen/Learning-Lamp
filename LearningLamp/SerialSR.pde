@@ -22,10 +22,10 @@ class SerialSR {
 
     try {
       //brightness
-      myPort.write(str(sendState.brightness));
+      myPort.write(str(Qobj.currentState.brightness));
       myPort.write(",");
       //position
-      myPort.write(str(sendState.position));
+      myPort.write(str(Qobj.currentState.position));
       myPort.write("/n");
       //println("--- Sending ---");
       //println("Brightness: " + str(sendState.brightness));
@@ -38,9 +38,9 @@ class SerialSR {
     }
   }
 
-  void updateSendState(State newState) {
+  /*void updateSendState(State newState) {
     sendState = newState;
-  }
+  }*/
 
   void serialEvent(Serial myPort) {
 
