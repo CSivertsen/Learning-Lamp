@@ -18,6 +18,7 @@ class QLearning {
   
   mySR = new SerialSR(this);
   currentState = new State(0,0);
+  incomingSituation = new Situation(0,0,0,false);
   
   situations = new ArrayList();
 
@@ -44,26 +45,30 @@ class QLearning {
     }
   }
 
-  void run() {
+  /*void run() {
     updateSituation();
-  }
+  }*/
 
-  void updateSituation() {
+  void updateSituation(Situation incomingSituation) {
     for (Situation situation : situations) {
       if (incomingSituation.time == situation.time && 
           incomingSituation.light == situation.light && 
           incomingSituation.temp == situation.temp && 
           incomingSituation.presence == situation.presence ) {
-            
-        currentSituation = situation;
-        println("Found the right situation");
+        
+        if (!situation.equals(currentSituation)){
+          currentSituation = situation;
+          println("Updating situation");
+          currentState = currentSituation.findBest();
+        }    
+        
       }
     }
   }
   
-  void setSituation(Situation _situation) {
+  /*void setSituation(Situation _situation) {
     incomingSituation = _situation;
-  }
+  }*/
 
   void reinforce(int val) {
     State newState = currentSituation.updateStateVal(val, currentState);     

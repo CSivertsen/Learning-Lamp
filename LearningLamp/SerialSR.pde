@@ -88,8 +88,7 @@ class SerialSR {
       //println(sensors);
 
       Situation inSituation = new Situation(inTime, inLight, inTemp, inPres);
-      Qobj.setSituation(inSituation);
-      println("has set incoming");
+      Qobj.updateSituation(inSituation);
       send();
     }
   }
