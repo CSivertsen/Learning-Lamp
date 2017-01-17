@@ -3,14 +3,17 @@
 #include <Adafruit_NeoPixel.h>
 
 Servo servo; //create servo object
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(24, 6, NEO_GRB + NEO_KHZ800); //initializ LED strip, 8 leds and pin 6
 
 //set up constants for the pins used
 const int LDRPin = A0;
 const int micPin = A1;
 const int TMPPin = A3;
 const int PIRPin = 2;
-const int timePotPin = A4;
+const int timePotPin = A5;
+const int stripPin = 6;
+
+const int numLeds = 32;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(numLeds, stripPin, NEO_GRB + NEO_KHZ800); //initializ LED strip, 8 leds and pin 6
 
 //create variables to store sensor values
 int LDRValue = 0;
@@ -28,10 +31,12 @@ int currentSound;
 int currentPresence;
 int currentTime;
 
+int inBright, inDir;
+
 int ledNumber = 0; //create variable for led numbers, initialize led as 0
 float temperature; // create variable for temperature
 
-int readCycle;
+long lastMovement;
 
 void setup() {
   // configure pins as input or output
@@ -42,15 +47,19 @@ void setup() {
   pinMode(timePotPin, INPUT);
 
   servo.attach(9); // create servo object
-  servo.write(0);
+  //servo.write(0);
 
   strip.begin(); // begin led strip
+  for (int i = 0; i < numLeds; i++) {
+    strip.setPixelColor(i, 0, 0, 0); //set colors
+  }
   strip.show(); // Initialize all pixels to 'off' in case some were left lit by a prior program.
 
-  //strip.setBrightness(20); //brigthness for ledstrips
-  //strip.show(); //To “push” the brightness data to the strip, call show():
+  strip.setBrightness(20); //brigthness for ledstrips
+  strip.show(); //To “push” the brightness data to the strip, call show():
 
   Serial.begin(9600); //start serial monitor
+  establishContact();
 
 }
 
@@ -77,24 +86,29 @@ void loop() {
   //Serial.println(PIRValue);
   checkTime();
 
-
-  // turn LED's on
-  //for (ledNumber; ledNumber < 24; ledNumber++) {
-  //  strip.setPixelColor(ledNumber, 245, 245, 245); //set colors
-  //  strip.show(); //  To “push” the color data to the strip, call show():
-  //}
-
-  serialSend();
+  /*
+  strip.setPixelColor(0, 255, 0, 0); //set colors
+  strip.show(); //  To “push” the color data to the strip, call show():
 
   delay(200);
 
+  for (int i = 0; i < 3; i++) {
+    strip.setPixelColor(i, 200, 200, 0); //set colors
+  }
+  strip.show(); //  To “push” the color data to the strip, call show():
+
+  delay(200);*/
 }
 
 void readSensors() {
   int TMPAccumulated = 0;
   //read sensor values
   micValue = analogRead(micPin);
+  delay(10);
   LDRValue = analogRead(LDRPin);
+  delay(10);
+  timePotValue = analogRead(timePotPin);
+  delay(10);
   TMPValue = analogRead(TMPPin);
   PIRValue = digitalRead(PIRPin);
 
@@ -119,28 +133,28 @@ void readSensors() {
 void tempState() {
   if (TMPAvg < 21 && TMPAvg > 19) {
     //Serial.print("Temp med");
-    currentTemp = 2;
+    currentTemp = 1;
   }
   else if (TMPAvg >= 21) {
     //Serial.print("Temp high");
-    currentTemp = 3;
+    currentTemp = 2;
   }
   else if (TMPAvg <= 19) {
     //Serial.print("Temp low");
-    currentTemp = 1;
+    currentTemp = 0;
   }
 
 }
 
 void checkTime() {
   if (timePotValue <= 255) {
-    currentTime = 1;
+    currentTime = 0;
   } else if (timePotValue > 255 && timePotValue <= 512) {
-    currentTime = 2;
+    currentTime = 1;
   } else if (timePotValue > 512 && timePotValue <= 768) {
-    currentTime = 3;
+    currentTime = 2;
   } else {
-    currentTime = 4;
+    currentTime = 3;
   }
 }
 
@@ -148,15 +162,15 @@ void checkTime() {
 void LDRState() {
   if (LDRValue > 600 && LDRValue < 800) {
     //Serial.print("Light med");
-    currentLight = 2;
+    currentLight = 1;
   }
   else if (LDRValue <= 600) {
     //Serial.print("Light low");
-    currentLight = 1;
+    currentLight = 0;
   }
   else if (LDRValue >= 800) {
     //Serial.print("Light high");
-    currentLight = 3;
+    currentLight = 2;
   }
 }
 
@@ -178,8 +192,9 @@ void detectMotion() {
   if (PIRValue == 1) { // if motion is detected move servo to new position
     //Serial.print("Motion detected");
     currentPresence = 1;
+    lastMovement = millis();
   }
-  else {
+  else if ( millis() - lastMovement > 60000) {
     //Serial.print("No motion");
     currentPresence = 0;
   }
@@ -187,16 +202,26 @@ void detectMotion() {
 }
 
 void updateState(int bright, int dir) {
-  for (ledNumber; ledNumber < 24; ledNumber++) {
-    strip.setPixelColor(ledNumber, bright, bright, bright); //set colors
-  }
-  strip.show(); //  To “push” the color data to the strip, call show():
 
   if (dir == 0) {
     servo.write(0);
   } else {
+    //Debugging
+    strip.setPixelColor(1, 0, 0, 255); //set color
+    strip.show();
     servo.write(180);
+    delay(500);
   }
+  
+  for (int i = 0; i < numLeds; i++) {
+    strip.setPixelColor(i, bright, bright, bright); //set colors
+    //strip.setPixelColor(i, 245, 245, 245); //set colors
+  }
+  strip.show(); //  To “push” the color data to the strip, call show():
+
+  //Debugging
+  //strip.setPixelColor(1, 0, 0, 255); //set color
+  //strip.show();
 
 }
 
@@ -204,54 +229,68 @@ void updateState(int bright, int dir) {
 void serialSend() {
 
   Serial.print(currentTime);
-  Serial.println('\n');
+  Serial.print(",");
 
   Serial.print(currentLight);
-  Serial.println('\n');
+  Serial.print(",");
 
   Serial.print(currentTemp);
-  Serial.println('\n');
+  Serial.print(",");
 
   Serial.print(currentPresence);
-  Serial.println('\n');
+  Serial.print(",");
 
-  Serial.print(currentSound);
-  Serial.println('\n');
+  Serial.println(currentSound);
 
-  Serial.print("S");
-  Serial.println('\n');
+  //Debugging
+  strip.setPixelColor(2, 0, 255, 0); //set colors
+  strip.show();
 }
 
 
 void establishContact() {
   while (Serial.available() <= 0) {
-    Serial.print("A\n");
+    Serial.println("0,0,0,0,0");
     delay(300);
   }
 }
 
 
 void serialEvent() {
-  int inBright, inDir;
-  
-  if (Serial.available()) {
+
+  if (Serial.available() > 0) {
 
     // get the new byte:
     String inString = (String)Serial.readStringUntil('\n');
 
-    if (inString == "A") {
-      readCycle = -1;
-      serialSend();
-    } else {
-      if (readCycle == 0) {
-        inBright = inString.toInt();
-      } else if ( readCycle == 1 ) {
-        inDir = inString.toInt();
-      }
-    }
+    String inBrightStr = getValue(inString, ',', 0);
+    String inDirStr = getValue(inString, ',', 1);
+
+    int inBright = inBrightStr.toInt();
+    int inDir = inDirStr.toInt();
 
     updateState(inBright, inDir);
+    serialSend();
 
-    readCycle++;
   }
 }
+
+//This helper function was copied from http://arduino.stackexchange.com/questions/1013/how-do-i-split-an-incoming-string on the 17/01/2017
+//Credit oharkins and H.Pauwelyn
+String getValue(String data, char separator, int index)
+{
+  int found = 0;
+  int strIndex[] = { 0, -1 };
+  int maxIndex = data.length() - 1;
+
+  for (int i = 0; i <= maxIndex && found <= index; i++) {
+    if (data.charAt(i) == separator || i == maxIndex) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i + 1 : i;
+    }
+  }
+  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+

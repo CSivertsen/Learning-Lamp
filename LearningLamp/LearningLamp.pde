@@ -8,13 +8,16 @@ void setup() {
   size(300, 300);
   
   Qobj = new QLearning();
+  
+  String portName = Serial.list()[0];
+  myPort = new Serial(this, portName, 9600);
 }
 
 void draw() {
   
   background(255, 0, 255);
 
-  Qobj.run();
+  //Qobj.run();
   Qobj.display();
 }
 

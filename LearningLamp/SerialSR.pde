@@ -1,87 +1,96 @@
 class SerialSR {
-  
+
   // Snippets of this code has been used earlier in Christian Sivertsen M11 Design Project - CRIGS Squad.
-  
+
   boolean firstContact = false;
   int readCycle;
 
   int inTime = 0;
   int inLight = 0;
   int inTemp = 0; 
+  int inSound = 0;
   boolean inPres = false;
   State sendState;
+  QLearning Qobj;
 
-  SerialSR() {
-  
+  SerialSR(QLearning _Qobj) {
+    Qobj = _Qobj;
+    sendState = new State(0,0);
   }
 
   void send() {
-    
-    //brightness
-    myPort.write(sendState.brightness);
-    
-    //position
-    myPort.write(sendState.position);
+
+    try {
+      //brightness
+      myPort.write(str(sendState.brightness));
+      myPort.write(",");
+      //position
+      myPort.write(str(sendState.position));
+      myPort.write("/n");
+      //println("--- Sending ---");
+      //println("Brightness: " + str(sendState.brightness));
+      //println("Direction: " + str(sendState.position));
+      //println("--- Receiving ---");
+    } 
+    catch (Exception e) {
+      println("Some Serial exception");
+      printStackTrace(e);
+    }
   }
-  
+
   void updateSendState(State newState) {
     sendState = newState;
   }
 
   void serialEvent(Serial myPort) {
 
-
-    String inString = myPort.readStringUntil('\n');
-
+    //The serial communication is highly inspired by the following example: https://www.arduino.cc/en/Tutorial/SerialCallResponseASCII
+    String inString = myPort.readStringUntil('\n');    
     if (inString != null) {
       inString = trim(inString);
 
+      int sensors[] = int(split(inString, ','));
+  
+      for (int i = 0; i < sensors.length; i++) {
+        switch (i) {
+        case 0: 
+          inTime = sensors[i];
+          break;
 
-      if (firstContact == false) {
-        if (inString.equals("A")) { 
-          myPort.clear();          // clear the serial port buffer
-          firstContact = true;     // you've had first contact from the microcontroller
-          myPort.write("A");       // ask for more
-          println("Had first contact");
-          readCycle = -1;
-        }
-      } else if (inString.equals("S")) { 
+        case 1: 
+          inLight = sensors[i];
+          break;
 
-        //Write the new state here
+        case 2: 
+          inTemp = sensors[i];
+          break;
 
-        myPort.write("A" + '\n');
-      } else {  
-
-        if ( readCycle == 0) {
-          //time 
-          inTime = Integer.parseInt(inString);
-        } else if ( readCycle == 1 ) {
-          //light
-          inLight = Integer.parseInt(inString);
-        } else if ( readCycle == 2 ) {
-          //temperature
-          inTemp = Integer.parseInt(inString);
-        } else if ( readCycle == 3 ) {
-          int tempPres = Integer.parseInt(inString);
+        case 3: 
+          int tempPres = sensors[i];
           if (tempPres == 1) {
             inPres = true;
           } else {
             inPres = false;
           }
+          break;
+
+        case 4: 
+          inSound = sensors[i];
+          if (inSound == 1) {
+            Qobj.reinforce(100);
+          }
+          break;
+        default: 
+          break;
         }
-
-
-        Situation inSituation = new Situation(inTime, inLight, inTemp, inPres);
       }
       
-      // print the values (for debugging purposes only):
-      println(readCycle + ": " + inString);
-      if (readCycle >= 9) {
-        readCycle = 0;
-      } else {
-        readCycle++;
-      }
-      
+      //println(sensors);
+
+      Situation inSituation = new Situation(inTime, inLight, inTemp, inPres);
+      Qobj.setSituation(inSituation);
+      println("has set incoming");
+      send();
     }
   }
 }

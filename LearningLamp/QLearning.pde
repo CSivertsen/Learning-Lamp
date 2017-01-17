@@ -12,10 +12,11 @@ class QLearning {
   State currentState; 
 
   Situation currentSituation;
+  Situation incomingSituation;
 
   QLearning() {
   
-  mySR = new SerialSR();
+  mySR = new SerialSR(this);
   currentState = new State(0,0);
   
   situations = new ArrayList();
@@ -49,21 +50,29 @@ class QLearning {
 
   void updateSituation() {
     for (Situation situation : situations) {
-      if (currentTime == situation.time && currentLight == situation.light && currentTemp == situation.temp && currentPres == situation.presence ) {
+      if (incomingSituation.time == situation.time && 
+          incomingSituation.light == situation.light && 
+          incomingSituation.temp == situation.temp && 
+          incomingSituation.presence == situation.presence ) {
+            
         currentSituation = situation;
+        println("Found the right situation");
       }
     }
+  }
+  
+  void setSituation(Situation _situation) {
+    incomingSituation = _situation;
   }
 
   void reinforce(int val) {
     State newState = currentSituation.updateStateVal(val, currentState);     
-    currentState = newState;
-    updateSendState(newState);
+    currentState = newState; 
+    sendState(newState);
   }
 
   void sendState(State newState) {
-    currentState = newState;
-    mySR.send(newState);
+    mySR.sendState = newState;
   }
 
   void display() {
