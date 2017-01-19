@@ -85,7 +85,8 @@ class SerialInterface {
         }
       }
       
-      //println(sensors);
+      println("Received situation:");
+      println(sensors);
 
       Situation inSituation = new Situation(inTime, inLight, inTemp, inPres);
       Qobj.updateSituation(inSituation);

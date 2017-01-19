@@ -65,7 +65,7 @@ class QLearning {
 
   void reinforce(float multiply) {
 
-    println("Reinforcement:");
+    println("Reinforcement: " + multiply );
     for (Situation situation : situations) {
       float timePoints = equalPoints - (abs(situation.time - currentSituation.time));
       float lightPoints = equalPoints - (abs(situation.light - currentSituation.light));
@@ -84,10 +84,10 @@ class QLearning {
       //println(lightPoints);
       //println(tempPoints);
       //println(presPoints);
-      println(totalPoints);
+      //println(totalPoints);
     } 
 
-    if (multiply > 0){
+    if (multiply < 0){
       currentState = currentSituation.findBest(currentState);
     }
   }
