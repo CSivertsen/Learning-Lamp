@@ -6,8 +6,10 @@ class QLearning {
   int currentLight;
   int currentTemp;
   boolean currentPres;
+  int reinforcementVal = 100;
+  int equalPoints = 2;
 
-  SerialSR mySR;
+  SerialInterface mySR;
 
   State currentState; 
 
@@ -15,12 +17,12 @@ class QLearning {
   Situation incomingSituation;
 
   QLearning() {
-  
-  mySR = new SerialSR(this);
-  currentState = new State(0,0);
-  incomingSituation = new Situation(0,0,0,false);
-  
-  situations = new ArrayList();
+
+    mySR = new SerialInterface(this);
+    currentState = new State(0, 0);
+    incomingSituation = new Situation(0, 0, 0, false);
+
+    situations = new ArrayList();
 
     //time
     for (int time = 0; time < 4; time++) {
@@ -45,40 +47,50 @@ class QLearning {
     }
   }
 
-  /*void run() {
-    updateSituation();
-  }*/
-
   void updateSituation(Situation incomingSituation) {
     for (Situation situation : situations) {
       if (incomingSituation.time == situation.time && 
-          incomingSituation.light == situation.light && 
-          incomingSituation.temp == situation.temp && 
-          incomingSituation.presence == situation.presence ) {
-        
-        if (!situation.equals(currentSituation)){
+        incomingSituation.light == situation.light && 
+        incomingSituation.temp == situation.temp && 
+        incomingSituation.presence == situation.presence ) {
+
+        if (!situation.equals(currentSituation)) {
           currentSituation = situation;
           println("Updating situation");
-          currentState = currentSituation.findBest();
-        }    
-        
+          currentState = currentSituation.findBest(currentState);
+        }
       }
     }
   }
-  
-  /*void setSituation(Situation _situation) {
-    incomingSituation = _situation;
-  }*/
 
-  void reinforce(int val) {
-    State newState = currentSituation.updateStateVal(val, currentState);     
-    currentState = newState; 
-    //sendState(newState);
+  void reinforce(float multiply) {
+
+    println("Reinforcement:");
+    for (Situation situation : situations) {
+      float timePoints = equalPoints - (abs(situation.time - currentSituation.time));
+      float lightPoints = equalPoints - (abs(situation.light - currentSituation.light));
+      float tempPoints = equalPoints - (abs(situation.temp - currentSituation.temp));
+
+      float presPoints = 0;
+      if (situation.presence == currentSituation.presence) {
+        presPoints = equalPoints;
+      }
+
+      float totalPoints = (reinforcementVal/(equalPoints * 4)) * (timePoints + lightPoints + tempPoints + presPoints) * multiply;
+
+      situation.updateStateVal(totalPoints, currentState);
+
+      //println(timePoints);
+      //println(lightPoints);
+      //println(tempPoints);
+      //println(presPoints);
+      println(totalPoints);
+    } 
+
+    if (multiply > 0){
+      currentState = currentSituation.findBest(currentState);
+    }
   }
-
-  /*void sendState(State newState) {
-    mySR.sendState = newState;
-  }*/
 
   void display() {
 
@@ -88,15 +100,13 @@ class QLearning {
     } else {
       rect(0, 0, width, height/2);
     }
-    
   }
-  
-  void showPolicy(){
+
+  void showPolicy() {
     println("Policy:");
-    
-    for( int i = 0; i < currentSituation.states.length-1; i++){
+
+    for ( int i = 0; i < currentSituation.states.length; i++) {
       println(currentSituation.states[i].value);
     }
-    
   }
 }

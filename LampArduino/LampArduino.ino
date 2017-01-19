@@ -47,7 +47,7 @@ void setup() {
   pinMode(timePotPin, INPUT);
 
   servo.attach(9); // create servo object
-  //servo.write(0);
+  servo.write(0);
 
   strip.begin(); // begin led strip
   for (int i = 0; i < numLeds; i++) {
@@ -243,8 +243,8 @@ void serialSend() {
   Serial.println(currentSound);
 
   //Debugging
-  strip.setPixelColor(2, 0, 255, 0); //set colors
-  strip.show();
+  //strip.setPixelColor(2, 0, 255, 0); //set colors
+  //strip.show();
 }
 
 

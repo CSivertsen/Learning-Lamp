@@ -26,34 +26,35 @@ class Situation {
     states = new State[]{stateA, stateB, stateC, stateD, stateE, stateF, stateG, stateH};
   }
 
-  State updateStateVal(int val, State currentState) {
-
-
+  void updateStateVal(float val, State currentState) {
     for (State state : states) {      
-      if (currentState.equals(state)) {
+      if (currentState.brightness == state.brightness &&
+        currentState.position == state.position) {
+          
         state.addVal(val);
       }
     }
-    
-    return findBest();
-
   }
 
-  State findBest() {
+  State findBest(State currentState) {
     ArrayList<State> highValueStates = new ArrayList();
-    int highestValue = -100000; 
+    float highestValue = -100000; 
 
     for (State state : states) {      
 
+      if (!state.equals(currentState)) {
 
-      if (state.getValue() > highestValue) {
-        highestValue = state.getValue();
+        if (state.getValue() > highestValue) {
+          highestValue = state.getValue();
+        }
       }
     } 
 
     for (State state : states) {
-      if (state.getValue() == highestValue) {
-        highValueStates.add(state);
+      if (!state.equals(currentState)) {
+        if (state.getValue() == highestValue) {
+          highValueStates.add(state);
+        }
       }
     }
 

@@ -19,14 +19,15 @@ void draw() {
 
   //Qobj.run();
   Qobj.display();
+
 }
 
 void mousePressed(){
   if (mouseButton == LEFT) {
-    Qobj.reinforce(-100);
+    Qobj.reinforce(-1);
   } 
   else if (mouseButton == RIGHT) {
-    Qobj.reinforce(100);
+    Qobj.reinforce(1);
   } 
 }
 

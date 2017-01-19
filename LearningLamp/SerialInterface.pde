@@ -1,4 +1,4 @@
-class SerialSR {
+class SerialInterface {
 
   // Snippets of this code has been used earlier in Christian Sivertsen M11 Design Project - CRIGS Squad.
 
@@ -13,7 +13,7 @@ class SerialSR {
   State sendState;
   QLearning Qobj;
 
-  SerialSR(QLearning _Qobj) {
+  SerialInterface(QLearning _Qobj) {
     Qobj = _Qobj;
     sendState = new State(0,0);
   }
@@ -77,7 +77,7 @@ class SerialSR {
         case 4: 
           inSound = sensors[i];
           if (inSound == 1) {
-            Qobj.reinforce(100);
+            Qobj.reinforce(-1);
           }
           break;
         default: 

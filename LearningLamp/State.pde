@@ -1,7 +1,7 @@
 class State {
   int brightness; 
   int position;
-  int value;
+  float value;
   
 State(int b, int p) {
   brightness = b;
@@ -9,15 +9,15 @@ State(int b, int p) {
   value = 0;
 }
 
-void setValue(int val){
+void setValue(float val){
   value = val;
 }
 
-void addVal(int val){
+void addVal(float val){
   value += val;
 }
 
-int getValue(){
+float getValue(){
   return value;
 }
   
