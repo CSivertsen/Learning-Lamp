@@ -1,24 +1,25 @@
+// A State object holds a certain combination of lamp position and brightness
+// as well as a how highly it is weighted. 
 class State {
   int brightness; 
   int position;
-  float value;
-  
+  float weight;
+
+// Constructor requires a brightness and position value. The default weight is 0.
 State(int b, int p) {
   brightness = b;
   position = p;
-  value = 0;
+  weight = 0;
 }
 
-void setValue(float val){
-  value = val;
-}
-
+// Used to change the weight when reinforcing
 void addVal(float val){
-  value += val;
+  weight += val;
 }
 
-float getValue(){
-  return value;
+// Returns the current weight of the state
+float getWeight(){
+  return weight;
 }
   
 }

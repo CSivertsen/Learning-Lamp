@@ -1,36 +1,38 @@
+// This class is used for handling serial communication with the Arduino
 class SerialInterface {
 
-  // Snippets of this code has been used earlier in Christian Sivertsen M11 Design Project - CRIGS Squad.
-
-  boolean firstContact = false;
-  int readCycle;
-
+  // Hold incoming values 
   int inTime = 0;
   int inLight = 0;
   int inTemp = 0; 
   int inSound = 0;
   boolean inPres = false;
+  
+  // Holds state that should be sent to Arduino
   State sendState;
+  
+  // Holds reference to the QLearning object that initialized it
   QLearning Qobj;
 
+  // Initializing the Serial interface with a default state
   SerialInterface(QLearning _Qobj) {
     Qobj = _Qobj;
     sendState = new State(0,0);
   }
 
+  // Called after this program has finished receiving data from 
+  // the Arduino and is ready to send. 
   void send() {
 
+    // Using try catch to help the program fail gracefully in case
+    // there is a problem with the serial connection.
     try {
-      //brightness
+      // Sends new brightness to Arduino
       myPort.write(str(Qobj.currentState.brightness));
       myPort.write(",");
-      //position
+      // Sends new position to Arduino
       myPort.write(str(Qobj.currentState.position));
       myPort.write("/n");
-      //println("--- Sending ---");
-      //println("Brightness: " + str(sendState.brightness));
-      //println("Direction: " + str(sendState.position));
-      //println("--- Receiving ---");
     } 
     catch (Exception e) {
       println("Some Serial exception");
@@ -38,13 +40,10 @@ class SerialInterface {
     }
   }
 
-  /*void updateSendState(State newState) {
-    sendState = newState;
-  }*/
-
+  // The serial communication is highly inspired by the following example: https://www.arduino.cc/en/Tutorial/SerialCallResponseASCII
   void serialEvent(Serial myPort) {
 
-    //The serial communication is highly inspired by the following example: https://www.arduino.cc/en/Tutorial/SerialCallResponseASCII
+    // Reads the incoming string and splits it into separate values. 
     String inString = myPort.readStringUntil('\n');    
     if (inString != null) {
       inString = trim(inString);
@@ -88,8 +87,12 @@ class SerialInterface {
       println("Received situation:");
       println(sensors);
 
+      // A new situation object is created from the incoming values and are passed onto updateSituation function.
+      // It might be more resource-friendly simply to pass the values directly. 
       Situation inSituation = new Situation(inTime, inLight, inTemp, inPres);
       Qobj.updateSituation(inSituation);
+      
+      // This programs sends information back to the Arduino
       send();
     }
   }
