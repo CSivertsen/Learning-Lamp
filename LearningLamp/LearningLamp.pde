@@ -1,3 +1,8 @@
+/*
+In the following code we are using the work state and situation different from the common convention surrounding Reinforcement Learning. 
+Here a situation refers to the combination of environmental factors measured on the Arduino, which is more commonly referred to as the state.
+Furthermore the state refers to the combination of the lamp brightness and lamp head position, which could be likened to the more commonly used action. 
+*/
 import processing.serial.*;
 
 QLearning Qobj;
