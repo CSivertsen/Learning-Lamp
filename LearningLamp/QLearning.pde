@@ -140,7 +140,7 @@ class QLearning {
     println("Policy:");
 
     for ( int i = 0; i < currentSituation.states.length; i++) {
-      println(currentSituation.states[i].value);
+      println(currentSituation.states[i].weight);
     }
   }
 }

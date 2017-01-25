@@ -44,5 +44,5 @@ void keyPressed(){
 
 // Register Serial events to enable listening for data from the Arduino
 void serialEvent(Serial myPort){
-  Qobj.mySR.serialEvent(myPort);
+  Qobj.mySI.serialEvent(myPort);
 }

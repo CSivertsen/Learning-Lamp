@@ -67,7 +67,7 @@ class Situation {
     // state are put into an ArrayList. 
     for (State state : states) {
       if (!state.equals(currentState)) {
-        if (state.getValue() == highestValue) {
+        if (state.getWeight() == highestValue) {
           highValueStates.add(state);
         }
       }
