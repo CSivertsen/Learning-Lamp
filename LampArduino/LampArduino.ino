@@ -71,7 +71,7 @@ void loop() {
   readSensors();
 
   // Convert raw values into ranges used in the Processing program
-  ldrState);
+  ldrState();
   soundDetect();
   tempState();
   detectMotion();
@@ -94,7 +94,7 @@ void readSensors() {
   tempVal = analogRead(tempPin);
   pirValue = digitalRead(pirPin);
 
-  // Temperature conversion fetched from xxx
+  // Temperature conversion from example in the book Fitzgerald, S (2012). Arduino Projects Book. Shiloh, M. & Igoe, T. (Eds.).  Arduino LLC
   // voltage = (sensor value/1024.0) * 5.0) --> temperatue = (voltage - 0.5) * 100
   // 10 milivolts change in sensor is 1 degrees change of celcius.
   temperature = (((tempVal / 1024.0) * 5.0) - 0.5) * 100; 
@@ -145,7 +145,7 @@ void checkTime() {
 }
 
 // Determine the light range. 
-void ldrState) {
+void ldrState() {
   if (ldrVal > 600 && ldrVal < 800) {
     currentLight = 1;
   }
